@@ -18,7 +18,6 @@ try:
     from mylog import SetupLogger
     from mylog import MyLog
     from mywebserver import FlaskAppWrapper
-    from myalexa import Alexa
     from mymqtt import MQTT
     from shutil import copyfile
 except Exception as e1:
@@ -377,9 +376,6 @@ class operateShutters(MyLog):
 
         self.webServer = None
 
-        if (args.echo == True):
-            self.alexa = Alexa(kwargs={'log':self.log, 'shutter': self.shutter, 'config': self.config})
-
         if (args.mqtt == True):
             self.mqtt = MQTT(kwargs={'log':self.log, 'shutter': self.shutter, 'config': self.config})
 
@@ -452,16 +448,10 @@ class operateShutters(MyLog):
              self.LogInfo ("rise shutter for 7 seconds")
              self.shutter.risePartial(self.config.ShuttersByName[args.shutterName], 7)
        elif ((args.shutterName != "")):
-             if (args.echo == True):
-                 self.alexa.setDaemon(True)
-                 self.alexa.start()
              if (args.mqtt == True):
                  self.mqtt.setDaemon(True)
                  self.mqtt.start()
        elif (args.auto == True):
-             if (args.echo == True):
-                 self.alexa.setDaemon(True)
-                 self.alexa.start()
              if (args.mqtt == True):
                  self.mqtt.setDaemon(True)
                  self.mqtt.start()
@@ -470,15 +460,9 @@ class operateShutters(MyLog):
        else:
           parser.print_help()
 
-       if (args.echo == True):
-           self.alexa.setDaemon(True)
-           self.alexa.start()
        if (args.mqtt == True):
            self.mqtt.setDaemon(True)
            self.mqtt.start()
-
-       if (args.echo == True):
-           self.alexa.join()
        if (args.mqtt == True):
            self.mqtt.join()
        self.LogInfo ("Process Command Completed....")
@@ -497,11 +481,6 @@ class operateShutters(MyLog):
 
         try:
             self.ProgramComplete = True
-            if (not self.alexa == None):
-                self.LogError("Stopping Alexa Listener. This can take up to 1 second...")
-                self.alexa.shutdown_flag.set()
-                self.alexa.join()
-                self.LogError("Alexa Listener stopped. Now exiting.")
             if (not self.mqtt == None):
                 self.LogError("Stopping MQTT Listener. This can take up to 1 second...")
                 self.mqtt.shutdown_flag.set()
@@ -527,7 +506,6 @@ if __name__ == '__main__':
     parser.add_argument('-program', '-p', help='program a new Shutter', action='store_true')
     parser.add_argument('-demo', help='lower the Shutter, Stop after 7 second, then raise the Shutter', action='store_true')
     parser.add_argument('-auto', '-a', help='will start up the web-server which can be used to setup the Shutters. Try: https://'+socket.gethostname(), action='store_true')
-    parser.add_argument('-echo', '-e', help='Enable Amazon Alexa (Echo) integration', action='store_true')
     parser.add_argument('-mqtt', '-m', help='Enable MQTT integration', action='store_true')
     args = parser.parse_args()
 
