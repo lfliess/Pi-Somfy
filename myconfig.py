@@ -20,8 +20,6 @@ class MyConfig (MyLog):
         self.InitComplete = False
 
         self.LogLocation = "/var/log/"
-        self.Latitude = 51.4769
-        self.Longitude = 0
         self.SendRepeat = 1
         self.UseHttps = False
         self.HTTPPort = 80
@@ -29,7 +27,6 @@ class MyConfig (MyLog):
         self.RTS_Address = "0x279620"
         self.Shutters = {}
         self.ShuttersByName = {}
-        self.Schedule = {}
         self.Password = ""
 
         try:
@@ -90,26 +87,9 @@ class MyConfig (MyLog):
             except Exception as e1:
                 self.LogErrorLine("Missing config file or config file entries in Section Shutters for key "+key+": " + str(e1))
                 return False
-                                   
-        self.SetSection("Scheduler")
-        schedules = self.GetList()
-        for key, value in schedules:
-            try:
-                param = value.split(",")
-                if param[0].strip().lower() in ('active', 'paused'):
-                   self.Schedule[key] = {'active': param[0], 'repeatType': param[1], 'repeatValue': param[2], 'timeType': param[3], 'timeValue': param[4], 'shutterAction': param[5], 'shutterIds': param[6]}
-            except Exception as e1:
-                self.LogErrorLine("Missing config file or config file entries in Section Scheduler for key "+key+": " + str(e1))
-                return False
+                                  
                                    
         return True
-
-    #---------------------MyConfig::setLocation---------------------------------
-    def setLocation(self, lat, lng):
-        self.WriteValue("Latitude", lat, section="General");
-        self.WriteValue("Longitude", lng, section="General");
-        self.Latitude = lat
-        self.Longitude = lng
 
     #---------------------MyConfig::setCode---------------------------------
     def setCode(self, shutterId, code):

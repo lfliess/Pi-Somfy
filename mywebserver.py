@@ -34,13 +34,12 @@ class FlaskAppWrapper(MyLog):
     app = None
     CriticalLock = None
 
-    def __init__(self, name = __name__, static_url_path = '', log = None, shutter = None, schedule = None, config = None):
+    def __init__(self, name = __name__, static_url_path = '', log = None, shutter = None, config = None):
         if log != None:
             self.log = log
         logging.getLogger('werkzeug').setLevel(logging.ERROR)
     
         self.shutter = shutter
-        self.schedule = schedule
         self.config = config
         
         self.app = Flask(import_name=name, static_url_path="", static_folder=static_url_path)
@@ -79,7 +78,7 @@ class FlaskAppWrapper(MyLog):
             # self.LogDebug("JSON: "+str(request.get_json()))
             # self.LogDebug("RAW: "+str(request.get_data()))
             command = args[1]['command']
-            if command in ["up", "down", "stop", "program", "getConfig", "addSchedule", "editSchedule", "deleteSchedule", "addShutter", "editShutter", "deleteShutter", "setLocation" ]:
+            if command in ["up", "down", "stop", "program", "getConfig", "addShutter", "editShutter", "deleteShutter"]:
                 self.LogInfo("processing Command \"" + command + "\" with parameters: "+str(request.values))
                 result = getattr(self, command)(request.values)
                 return Response(json.dumps(result), status=200)
@@ -153,11 +152,6 @@ class FlaskAppWrapper(MyLog):
         self.shutter.program(shutter)
         return {'status': 'OK'}
 
-    def setLocation(self, params):
-        self.LogDebug("set Location: "+params.get('lat', 0, type=str)+" / "+params.get('lng', 0, type=str))
-        self.config.setLocation(params.get('lat', 0, type=str), params.get('lng', 0, type=str))
-        self.schedule.setUpdateTime()
-        return {'status': 'OK'}
 
     def addShutter(self, params):
         if sys.version_info[0] < 3:
@@ -236,27 +230,13 @@ class FlaskAppWrapper(MyLog):
             self.config.Shutters.pop(id, None)
             return {'status': 'OK'}
 
-    def addSchedule(self, params):
-        self.LogDebug("create new schedule")
-        return self.schedule.addSchedule(params.to_dict(flat=False));
-
-    def editSchedule(self, params):
-        id = params.get('id', 0, type=str)
-        self.LogDebug("change schedule: "+id)
-        return self.schedule.editSchedule(id, params.to_dict(flat=False));
-
-    def deleteSchedule(self, params):
-        id = params.get('id', 0, type=str)
-        self.LogDebug("delete schedule: "+id)
-        return self.schedule.deleteSchedule(id);
-
     def getConfig(self, params):
         shutters = {}
         durations = {}
         for k in self.config.Shutters:
             shutters[k] = self.config.Shutters[k]['name']  
             durations[k] = self.config.Shutters[k]['duration']            
-        obj = {'Latitude': self.config.Latitude, 'Longitude': self.config.Longitude, 'Shutters': shutters, 'ShutterDurations': durations, 'Schedule': self.schedule.getScheduleAsDict()}
+        obj = {'Shutters': shutters, 'ShutterDurations': durations}
         self.LogDebug("getConfig called, sending: "+json.dumps(obj))
         return obj
 

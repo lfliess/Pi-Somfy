@@ -17,9 +17,6 @@ try:
     from myconfig import MyConfig
     from mylog import SetupLogger
     from mylog import MyLog
-    from myscheduler import Event
-    from myscheduler import Schedule
-    from myscheduler import Scheduler
     from mywebserver import FlaskAppWrapper
     from myalexa import Alexa
     from mymqtt import MQTT
@@ -378,8 +375,6 @@ class operateShutters(MyLog):
         # signal.signal(signal.SIGTERM, self.Close)
         # signal.signal(signal.SIGINT, self.Close)
 
-        self.schedule = Schedule(log = self.log, config = self.config)
-        self.scheduler = None
         self.webServer = None
 
         if (args.echo == True):
@@ -456,31 +451,21 @@ class operateShutters(MyLog):
              time.sleep(7)
              self.LogInfo ("rise shutter for 7 seconds")
              self.shutter.risePartial(self.config.ShuttersByName[args.shutterName], 7)
-       elif ((args.shutterName != "") and (args.duskdawn is not None)):
-             self.schedule.addRepeatEventBySunrise([self.config.ShuttersByName[args.shutterName]], 'up', args.duskdawn[1], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
-             self.schedule.addRepeatEventBySunset([self.config.ShuttersByName[args.shutterName]], 'down', args.duskdawn[0], ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
-             self.scheduler = Scheduler(kwargs={'log':self.log, 'schedule':self.schedule, 'shutter': self.shutter, 'config': self.config})
-             self.scheduler.setDaemon(True)
-             self.scheduler.start()
+       elif ((args.shutterName != "")):
              if (args.echo == True):
                  self.alexa.setDaemon(True)
                  self.alexa.start()
              if (args.mqtt == True):
                  self.mqtt.setDaemon(True)
                  self.mqtt.start()
-             self.scheduler.join()
        elif (args.auto == True):
-             self.schedule.loadScheudleFromConfig()
-             self.scheduler = Scheduler(kwargs={'log':self.log, 'schedule':self.schedule, 'shutter': self.shutter, 'config': self.config})
-             self.scheduler.setDaemon(True)
-             self.scheduler.start()
              if (args.echo == True):
                  self.alexa.setDaemon(True)
                  self.alexa.start()
              if (args.mqtt == True):
                  self.mqtt.setDaemon(True)
                  self.mqtt.start()
-             self.webServer = FlaskAppWrapper(name='WebServer', static_url_path=os.path.dirname(os.path.realpath(__file__))+'/html', log = self.log, shutter = self.shutter, schedule = self.schedule, config = self.config)
+             self.webServer = FlaskAppWrapper(name='WebServer', static_url_path=os.path.dirname(os.path.realpath(__file__))+'/html', log = self.log, shutter = self.shutter, config = self.config)
              self.webServer.run()
        else:
           parser.print_help()
@@ -512,11 +497,6 @@ class operateShutters(MyLog):
 
         try:
             self.ProgramComplete = True
-            if (not self.scheduler == None):
-                self.LogError("Stopping Scheduler. This can take up to 1 second...")
-                self.scheduler.shutdown_flag.set()
-                self.scheduler.join()
-                self.LogError("Scheduler stopped. Now exiting.")
             if (not self.alexa == None):
                 self.LogError("Stopping Alexa Listener. This can take up to 1 second...")
                 self.alexa.shutdown_flag.set()
@@ -546,8 +526,7 @@ if __name__ == '__main__':
     parser.add_argument('-stop', '-s', help='stop the Shutter', action='store_true')
     parser.add_argument('-program', '-p', help='program a new Shutter', action='store_true')
     parser.add_argument('-demo', help='lower the Shutter, Stop after 7 second, then raise the Shutter', action='store_true')
-    parser.add_argument('-duskdawn', '-dd', type=int, nargs=2, help='Automatically lower the shutter at sunset and rise the shutter at sunrise, provide the evening delay and morning delay in minutes each')
-    parser.add_argument('-auto', '-a', help='Run schedule based on config. Also will start up the web-server which can be used to setup the schedule. Try: https://'+socket.gethostname(), action='store_true')
+    parser.add_argument('-auto', '-a', help='will start up the web-server which can be used to setup the Shutters. Try: https://'+socket.gethostname(), action='store_true')
     parser.add_argument('-echo', '-e', help='Enable Amazon Alexa (Echo) integration', action='store_true')
     parser.add_argument('-mqtt', '-m', help='Enable MQTT integration', action='store_true')
     args = parser.parse_args()
