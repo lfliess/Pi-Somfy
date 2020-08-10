@@ -7,7 +7,7 @@ import os
 import locale
 import time
 import datetime
-from .. import pigpio
+from pigpio-master import pigpio
 import socket
 import signal, atexit, traceback
 import logging, logging.handlers
@@ -402,7 +402,7 @@ class operateShutters(MyLog):
            status, process = commands.getstatusoutput('sudo pidof pigpiod')
            if status:  #  it wasn't running, so start it
                self.LogInfo ("pigpiod was not running")
-               commands.getstatusoutput('sudo pigpiod -l -m')  # try to  start it
+               commands.getstatusoutput('sudo pigpio-master/pigpiod -l -m')  # try to  start it
                time.sleep(0.5)
                # check it again
                status, process = commands.getstatusoutput('sudo pidof pigpiod')
