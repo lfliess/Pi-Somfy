@@ -7,7 +7,7 @@ import os
 import locale
 import time
 import datetime
-from pigpio-master import pigpio
+from ..pigpio-master import pigpio
 import socket
 import signal, atexit, traceback
 import logging, logging.handlers
