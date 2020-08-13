@@ -399,22 +399,22 @@ class operateShutters(MyLog):
     def startPIGPIO(self):
        if sys.version_info[0] < 3:
            import commands
-           status, process = commands.getstatusoutput('sudo pidof pigpiod')
+           status, process = commands.getstatusoutput('pidof pigpiod')
            if status:  #  it wasn't running, so start it
                self.LogInfo ("pigpiod was not running")
-               commands.getstatusoutput('sudo pigpio/pigpiod -l -m')  # try to  start it
+               commands.getstatusoutput('pigpiod -m')  # try to  start it
                time.sleep(0.5)
                # check it again
-               status, process = commands.getstatusoutput('sudo pidof pigpiod')
+               status, process = commands.getstatusoutput('pidof pigpiod')
        else:
            import subprocess
-           status, process = subprocess.getstatusoutput('sudo pidof pigpiod')
+           status, process = subprocess.getstatusoutput('pidof pigpiod')
            if status:  #  it wasn't running, so start it
                self.LogInfo ("pigpiod was not running")
-               subprocess.getstatusoutput('sudo pigpio/pigpiod -l -m')  # try to  start it
+               subprocess.getstatusoutput('pigpiod -m')  # try to  start it
                time.sleep(0.5)
                # check it again
-               status, process = subprocess.getstatusoutput('sudo pidof pigpiod')
+               status, process = subprocess.getstatusoutput('pidof pigpiod')
 
        if not status:  # if it was started successfully (or was already running)...
            pigpiod_process = process
