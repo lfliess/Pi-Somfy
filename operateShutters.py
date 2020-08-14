@@ -434,6 +434,7 @@ class operateShutters(MyLog):
     #--------------------- operateShutters::ProcessCommand -----------------------------------------------
     def ProcessCommand(self, args):
        if ((args.shutterName != "") and (args.down == True)):
+           
              self.shutter.lower(self.config.ShuttersByName[args.shutterName])
        elif ((args.shutterName != "") and (args.up == True)):
              self.shutter.rise(self.config.ShuttersByName[args.shutterName])
@@ -447,16 +448,18 @@ class operateShutters(MyLog):
              time.sleep(7)
              self.LogInfo ("rise shutter for 7 seconds")
              self.shutter.risePartial(self.config.ShuttersByName[args.shutterName], 7)
-       elif ((args.shutterName != "")):
-             if (args.mqtt == True):
-                 self.mqtt.setDaemon(True)
-                 self.mqtt.start()
+
        elif (args.auto == True):
              if (args.mqtt == True):
                  self.mqtt.setDaemon(True)
                  self.mqtt.start()
+             self.LogInfo("start web server")
              self.webServer = FlaskAppWrapper(name='WebServer', static_url_path=os.path.dirname(os.path.realpath(__file__))+'/html', log = self.log, shutter = self.shutter, config = self.config)
              self.webServer.run()
+       elif ((args.shutterName != "")):
+             if (args.mqtt == True):
+                 self.mqtt.setDaemon(True)
+                 self.mqtt.start()
        else:
           parser.print_help()
 
