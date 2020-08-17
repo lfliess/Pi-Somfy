@@ -32,7 +32,6 @@ function GetStartupInfo(initMap)
             function(result, status){
                config = result;
                setupTableShutters();
-               setupTableSchedule();
                if (config.Longitude == 0) {
                    $('#collapseOne').collapse('show');
                } else if (Object.keys(config.Shutters).length == 0){
@@ -117,50 +116,6 @@ function deleteShutter(id) {
                }, "json");
 }
 
-function addSchedule(temp_id, param) {
-    var url = baseurl.concat("addSchedule");
-      $.post(  url,
-               param,
-               function(result, status){
-                   config.Schedule[result.id] = param;
-                   evt = config.Schedule[result.id];
-                   $(modalCallerIconElement).parents("tr").find('#scheduleText').html(prettyPrintSchedule(evt, config.Shutters));
-                   $(modalCallerIconElement).parents("tr").find(".editbox").toggle();              
-                   $(modalCallerIconElement).addClass("glyphicon-floppy-save").removeClass("glyphicon-refresh").removeClass("gly-spin");
-        	   $(modalCallerIconElement).parents("tr").find(".save, .edit").toggle();
-	           $(modalCallerIconElement).parents("tr").find(".delete").show();
-                   if ((status=="success") && (result.status == "OK")) {
-                      $(modalCallerIconElement).parents("tr").attr('name', result.id);
-                   } else {
-                      BootstrapDialog.show({type: BootstrapDialog.TYPE_DANGER, title: 'Error', message:'Received Error from Server: '+result.message});
-                   }
-               }, "json");
-}
-
-function editSchedule(id, param, resetIcon) {
-    var url = baseurl.concat("editSchedule");
-      $.post(  url,
-               param,
-               function(result, status){
-                   resetIcon();
-                   if ((status=="success") && (result.status == "OK")) {
-                   } else {
-                      BootstrapDialog.show({type: BootstrapDialog.TYPE_DANGER, title: 'Error', message:'Received Error from Server: '+result.message, onhide: function(){GetStartupInfo(false);}});
-                   }
-               }, "json");
-}
-
-function deleteSchedule(id) {
-    var url = baseurl.concat("deleteSchedule");
-      $.post(  url,
-               {id: id},
-               function(result, status){
-                   if ((status=="success") && (result.status == "OK")) {
-                   } else {
-                      BootstrapDialog.show({type: BootstrapDialog.TYPE_DANGER, title: 'Error', message:'Received Error from Server: '+result.message, onhide: function(){GetStartupInfo(false);}});
-                   }
-               }, "json");
-}
 
 
 
@@ -304,8 +259,6 @@ function setupListeners() {
              var rowId = $(modalCallerIconElement).parents("tr").attr('name');
              if (tableId == "shutters") {
                  deleteShutter(rowId);
-             } else if (tableId == "schedule") {
-                 deleteSchedule(rowId);
              }
         }
         $('#confirm-delete').modal('hide');
