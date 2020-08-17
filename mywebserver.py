@@ -81,6 +81,7 @@ class FlaskAppWrapper(MyLog):
             if command in ["up", "down", "stop", "program", "getConfig", "addShutter", "editShutter", "deleteShutter"]:
                 self.LogInfo("processing Command \"" + command + "\" with parameters: "+str(request.values))
                 result = getattr(self, command)(request.values)
+                self.LogInfo("returning result" +result)
                 return Response(json.dumps(result), status=200)
             else:
                 self.LogWarn("UNKNOWN COMMAND " + command)
@@ -289,7 +290,7 @@ class FlaskAppWrapper(MyLog):
             self.app.run(host="0.0.0.0", port=self.config.HTTPSPort, threaded = True, ssl_context=self.generate_adhoc_ssl_context(), use_reloader = False, debug = False)
         else:
             self.LogInfo("Starting WebServer on Port "+str(self.config.HTTPPort))
-            self.app.run(host="0.0.0.0", threaded = True, port=self.config.HTTPPort, use_reloader = False, debug = False)
+            self.app.run(host="0.0.0.0", threaded = True, port=self.config.HTTPPort, use_reloader = False, debug = True)
         self.LogInfo("Stopping WebServer")
 
 
