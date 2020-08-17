@@ -81,7 +81,6 @@ class FlaskAppWrapper(MyLog):
             if command in ["up", "down", "stop", "program", "getConfig", "addShutter", "editShutter", "deleteShutter"]:
                 self.LogInfo("processing Command \"" + command + "\" with parameters: "+str(request.values))
                 result = getattr(self, command)(request.values)
-                self.LogInfo("returning result" +result)
                 return Response(json.dumps(result), status=200)
             else:
                 self.LogWarn("UNKNOWN COMMAND " + command)
